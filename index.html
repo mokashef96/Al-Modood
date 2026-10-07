@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qanetoon Academy - Types of Madd</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light slate background */
+            margin: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styling */
+        .academy-header {
+            background: linear-gradient(135deg, #0f766e 0%, #042f2e 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .academy-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.025em;
+        }
+
+        .academy-header p {
+            color: #ccfbf1;
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+
+        /* Tooltip / Instructions */
+        .instructions {
+            text-align: center;
+            padding: 1rem;
+            color: #475569;
+            font-size: 0.9rem;
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* SVG Container */
+        #tree-container {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Allow scrolling if it gets too big */
+            background-color: white;
+            cursor: grab;
+        }
+        
+        #tree-container:active {
+            cursor: grabbing;
+        }
+
+        /* D3 Elements Styling */
+        .node {
+            cursor: pointer;
+        }
+
+        .node circle {
+            fill: #fff;
+            stroke: #0f766e; /* Primary Teal */
+            stroke-width: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .node circle:hover {
+            stroke: #d97706; /* Secondary Amber on hover */
+            stroke-width: 4px;
+        }
+
+        /* Text styling */
+        .node text {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            fill: #1e293b;
+        }
+
+        .node text.details {
+            font-size: 12px;
+            font-weight: 500;
+            fill: #ea580c; /* Orange for beats/desc */
+        }
+
+        /* Links / Branches styling */
+        .link {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 2.5px;
+            stroke-opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="academy-header">
+        <h1>Qanetoon Academy</h1>
+        <p>Interactive Map: Types of Madd (Lengthening)</p>
+    </header>
+
+    <div class="instructions">
+        💡 <strong>Tip:</strong> Click on the circles to expand or collapse the branches. Drag the canvas to pan around.
+    </div>
+
+    <!-- The container where D3 will draw the tree -->
+    <div id="tree-container"></div>
+
+    <script>
+        // --- 1. Define the Hierarchical Data ---
+        const treeData = {
+            name: "Madd (Lengthening)",
+            desc: "Prolonging the sound",
+            children: [
+                {
+                    name: "Natural Madd (Asli)",
+                    desc: "2 Beats",
+                    children: [
+                        { name: "Normal (Tabi'ee)" },
+                        { name: "Iwadh" },
+                        { name: "Sila Sughra" }
+                    ]
+                },
+                {
+                    name: "Secondary Madd (Far'i)",
+                    desc: "Depends on cause",
+                    children: [
+                        {
+                            name: "Cause: Hamzah",
+                            children: [
+                                { name: "Muttasil", desc: "4-5 Beats" },
+                                { name: "Munfasil", desc: "4-5 Beats" },
+                                { name: "Sila Kubra", desc: "4-5 Beats" },
+                                { name: "Badal", desc: "2 Beats" }
+                            ]
+                        },
+                        {
+                            name: "Cause: Sukoon",
+                            children: [
+                                { name: "'Aarid li-Sukun", desc: "2, 4, or 6 Beats" },
+                                { name: "Lin", desc: "2, 4, or 6 Beats" },
+                                {
+                                    name: "Lazim",
+                                    desc: "6 Beats",
+                                    children: [
+                                        { name: "Kalimi (Word)" },
+                                        { name: "Harfi (Letter)" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // --- 2. Setup D3 SVG Canvas Dimensions ---
+        const container = document.getElementById('tree-container');
+        const width = container.clientWidth;
+        const margin = { top: 40, right: 120, bottom: 40, left: 200 };
+        const dy = 220; // Horizontal distance between nodes
+        const dx = 60;  // Vertical distance between nodes
+        
+        const svg = d3.select("#tree-container").append("svg")
+            .attr("width", width)
+            .attr("height", 800) // Initial height, will update dynamically
+            .style("font", "10px sans-serif")
+            .style("user-select", "none");
+
+        // Add Zoom & Pan functionality
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 2])
+            .on("zoom", (event) => {
+                gLink.attr("transform", event.transform);
+                gNode.attr("transform", event.transform);
+            });
+            
+        svg.call(zoom);
+
+        // Grouping containers
+        const gLink = svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#cbd5e1");
+
+        const gNode = svg.append("g")
+            .attr("cursor", "pointer")
+            .attr("pointer-events", "all");
+
+        // Set initial zoom transform
+        const initialTransform = d3.zoomIdentity.translate(margin.left, margin.top).scale(1);
+        svg.call(zoom.transform, initialTransform);
+
+        // --- 3. D3 Hierarchy and Tree Layout ---
+        const root = d3.hierarchy(treeData);
+        const tree = d3.tree().nodeSize([dx, dy]);
+
+        // Define initial coordinates for animation
+        root.x0 = 0;
+        root.y0 = 0;
+
+        // Collapse a node and all its children
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
+
+        // Initially collapse deep branches (Cause: Hamzah & Cause: Sukoon) for better interaction demonstration
+        root.children[1].children.forEach(collapse);
+
+        // --- 4. The Update Function (Handles expanding/collapsing) ---
+        function update(source) {
+            const duration = d3.event && d3.event.altKey ? 2500 : 400;
+            const nodes = root.descendants().reverse();
+            const links = root.links();
+
+            // Compute the new tree layout
+            tree(root);
+
+            // Dynamically adjust the SVG height based on expanded nodes
+            let left = root;
+            let right = root;
+            root.eachBefore(node => {
+                if (node.x < left.x) left = node;
+                if (node.x > right.x) right = node;
+            });
+            
+            const height = right.x - left.x + margin.top + margin.bottom + 100;
+            
+            const transition = svg.transition()
+                .duration(duration)
+                .attr("height", height)
+                .tween("resize", window.ResizeObserver ? null : () => () => svg.dispatch("toggle"));
+
+            // Center the tree vertically via the transform
+            const yOffset = -left.x + margin.top;
+            gNode.transition(transition).attr("transform", `translate(${margin.left},${yOffset})`);
+            gLink.transition(transition).attr("transform", `translate(${margin.left},${yOffset})`);
+
+            // --------- NODES ---------
+            // Update the nodes...
+            const node = gNode.selectAll("g.node")
+                .data(nodes, d => d.id || (d.id = ++i)); // Need an ID for binding
+
+            let i = 0;
+
+            // Enter any new nodes at the parent's previous position
+            const nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${source.y0},${source.x0})`)
+                .attr("fill-opacity", 0)
+                .attr("stroke-opacity", 0)
+                .on("click", (event, d) => {
+                    d.children = d.children ? null : d._children;
+                    update(d);
+                });
+
+            // Node Circle
+            nodeEnter.append("circle")
+                .attr("r", 7)
+                .attr("fill", d => d._children ? "#ccfbf1" : "#fff") // Color if it has collapsed children
+                .attr("stroke-width", 2.5);
+
+            // Node Title Text
+            nodeEnter.append("text")
+                .attr("dy", d => d.data.desc ? "-0.2em" : "0.31em") // Adjust alignment based on subtitle presence
+                .attr("x", d => d._children || d.children ? -12 : 12)
+                .attr("text-anchor", d => d._children || d.children ? "end" : "start")
+                .text(d => d.data.name)
+                .clone(true).lower()
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-width", 3)
+                .attr("stroke", "white"); // White outline for readability
+
+            // Node Description Text (Beats)
+            nodeEnter.append("text")
+                .attr("class", "details")
+                .attr("dy", "1em")
+                .attr("x", d => d._children || d.children ? -12 : 12)
+                .attr("text-anchor", d => d._children || d.children ? "end" : "start")
+                .text(d => d.data.desc || "");
+
+            // Transition nodes to their new position
+            const nodeUpdate = node.merge(nodeEnter).transition(transition)
+                .attr("transform", d => `translate(${d.y},${d.x})`)
+                .attr("fill-opacity", 1)
+                .attr("stroke-opacity", 1);
+
+            // Update circle visual state
+            nodeUpdate.select("circle")
+                .attr("fill", d => d._children ? "#0f766e" : "#fff") // Filled if children hidden
+                .attr("stroke", "#0f766e");
+
+            // Transition exiting nodes to the parent's new position
+            const nodeExit = node.exit().transition(transition).remove()
+                .attr("transform", d => `translate(${source.y},${source.x})`)
+                .attr("fill-opacity", 0)
+                .attr("stroke-opacity", 0);
+
+            // --------- LINKS ---------
+            const link = gLink.selectAll("path.link")
+                .data(links, d => d.target.id);
+
+            // Function for drawing curves
+            const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+
+            // Enter any new links at the parent's previous position
+            const linkEnter = link.enter().append("path")
+                .attr("class", "link")
+                .attr("d", d => {
+                    const o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                });
+
+            // Transition links to their new position
+            link.merge(linkEnter).transition(transition)
+                .attr("d", diagonal);
+
+            // Transition exiting nodes to the parent's new position
+            link.exit().transition(transition).remove()
+                .attr("d", d => {
+                    const o = {x: source.x, y: source.y};
+                    return diagonal({source: o, target: o});
+                });
+
+            // Stash the old positions for transition
+            root.eachBefore(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+        }
+
+        // Initialize display
+        update(root);
+        
+        // Handle window resize properly
+        window.addEventListener('resize', () => {
+            const newWidth = document.getElementById('tree-container').clientWidth;
+            d3.select("svg").attr("width", newWidth);
+        });
+
+    </script>
+</body>
+</html>
