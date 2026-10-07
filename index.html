@@ -3,215 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعلم الحر - Types of Madd</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>المعلم الحر - Tajweed Madd Map</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Slate 50 background */
             margin: 0;
-            overflow: hidden; /* Prevent body scroll, let D3 handle pan */
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            width: 100vw;
+            background-color: #ffffff;
         }
 
         /* Header Styling */
-        .academy-header {
-            background: linear-gradient(135deg, #0f766e 0%, #064e3b 100%); /* Teal/Dark Green Theme */
+        .header {
+            background-color: #115e59;
             color: white;
-            padding: 1.25rem 2rem;
+            padding: 15px 20px;
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        
-        .academy-header h1 {
-            font-size: 1.85rem;
-            font-weight: 700;
+        .header h1 {
             margin: 0;
-            letter-spacing: 0.025em;
+            font-size: 22px;
         }
-
-        .academy-header p {
-            color: #ccfbf1;
-            margin-top: 0.4rem;
-            font-size: 1.05rem;
-            font-weight: 400;
-        }
-
-        /* Toolbar / Instructions */
-        .toolbar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 0.75rem 1.5rem;
-            background-color: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            z-index: 5;
-        }
-
-        .instructions-text {
-            color: #334155;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
         .reset-btn {
-            background-color: #f1f5f9;
-            color: #0f766e;
-            border: 1px solid #cbd5e1;
-            padding: 0.4rem 1rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            background-color: #0d9488;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .reset-btn:hover { background-color: #0f766e; }
+
+        /* Main Container */
+        .main-container {
             display: flex;
-            align-items: center;
-            gap: 0.4rem;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .reset-btn:hover {
-            background-color: #e2e8f0;
-            border-color: #94a3b8;
-            color: #115e59;
-        }
-
-        /* SVG Container */
-        #tree-container {
-            flex-grow: 1;
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
-            cursor: grab;
+        /* D3 Map Area */
+        #map-container {
+            flex: 1;
             position: relative;
+            background-color: #fafafa;
         }
         
-        #tree-container:active {
-            cursor: grabbing;
-        }
-
-        /* D3 Elements Styling */
-        .node {
-            cursor: pointer;
-        }
-
         .node circle {
             fill: #fff;
-            stroke: #0d9488; /* Teal 600 */
+            stroke: #0d9488;
             stroke-width: 3px;
-            transition: stroke 0.3s, stroke-width 0.3s;
+            cursor: pointer;
         }
-
-        .node circle:hover {
-            stroke: #ea580c; /* Orange 600 */
-            stroke-width: 4px;
-        }
-
-        /* Text styling */
         .node text {
-            font-family: 'Inter', sans-serif;
-            pointer-events: none; /* Prevent text from interfering with click events */
+            font: 13px sans-serif;
+            fill: #333;
         }
-
-        .title-text {
-            font-size: 14px;
-            font-weight: 600;
-            fill: #1e293b;
+        .node text.details {
+            font: 11px sans-serif;
+            fill: #d97706;
         }
-
-        .subtitle-text {
-            font-size: 11.5px;
-            font-weight: 500;
-            fill: #c2410c; /* Deep Orange for examples/beats */
-        }
-
-        .text-outline {
-            stroke: white;
-            stroke-width: 4px;
-            stroke-linejoin: round;
-            fill: none;
-            opacity: 0.8;
-        }
-
-        /* Links / Branches styling */
         .link {
             fill: none;
             stroke: #cbd5e1;
             stroke-width: 2px;
-            transition: all 0.3s ease;
         }
+
+        /* Instructions Top Bar */
+        .instructions {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 14px;
+            color: #444;
+            display: flex;
+            gap: 20px;
+            pointer-events: none;
+        }
+
+        /* Details Panel (The Box you requested) */
+        #details-panel {
+            width: 380px;
+            background: #ffffff;
+            border-left: 1px solid #eaeaea;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .panel-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title-ar {
+            color: #3b82f6;
+            font-family: 'Amiri', serif;
+            font-size: 26px;
+            font-weight: normal;
+        }
+        .badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #f4f4f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .info-label {
+            font-size: 11px;
+            color: #71717a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 15px;
+            color: #18181b;
+            font-weight: 600;
+        }
+
+        .description-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #52525b;
+            margin: 10px 0 20px 0;
+        }
+
+        .example-box {
+            background: #f4f4f5;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .example-en {
+            flex: 1;
+            font-size: 14px;
+            color: #52525b;
+            font-style: italic;
+        }
+        .example-ar {
+            font-family: 'Amiri', serif;
+            font-size: 32px;
+            color: #111;
+            text-align: right;
+            line-height: 1.2;
+        }
+
     </style>
 </head>
 <body>
 
-    <header class="academy-header">
-        <h1>المعلم الحر</h1>
-        <p>Interactive Map: Types of Madd (Lengthening)</p>
-    </header>
-
-    <div class="toolbar">
-        <div class="instructions-text">
-            💡 <strong>Tip:</strong> Click on nodes to expand/collapse. Drag to pan, scroll to zoom.
-        </div>
-        <button id="reset-btn" class="reset-btn" onclick="resetMap()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            Reset Map
-        </button>
+    <div class="header">
+        <h1>المعلم الحر - Tajweed Rules Map</h1>
+        <button class="reset-btn" onclick="resetMap()">Reset Map View</button>
     </div>
 
-    <div id="tree-container"></div>
+    <div class="main-container">
+        <!-- D3 Map Area -->
+        <div id="map-container">
+            <div class="instructions">
+                <span>👆 Tap node to expand/collapse branch</span>
+                <span>🔘 Select any node for detailed Tajweed rules</span>
+            </div>
+        </div>
+
+        <!-- Details Panel (Matches your image exactly) -->
+        <div id="details-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span id="dt-name">Madd (Lengthening)</span>
+                    <span id="dt-ar" class="panel-title-ar">المد</span>
+                </div>
+                <div id="dt-badge" class="badge">2 to 6 Beats</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Rule / Cause</div>
+                <div id="dt-rule" class="info-value">Natural or Secondary Cause</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Standard Duration</div>
+                <div id="dt-duration" class="info-value">2 to 6 Beats</div>
+            </div>
+
+            <div id="dt-desc" class="description-text">
+                Madd literally means prolongation or expansion. In Tajweed, it refers to prolonging the voice with a vowel sound when meeting specific letters.
+            </div>
+
+            <div class="example-box">
+                <div>
+                    <div class="info-label">Quranic Example</div>
+                    <div id="dt-ex-en" class="example-en">Nūḥīhā (We reveal it to you (contains all 3 Madd letters))</div>
+                </div>
+                <div id="dt-ex-ar" class="example-ar">نُوحِيهَا</div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // --- Complete Tajweed Data Structure ---
         const treeData = {
-            name: "Madd (Lengthening)",
-            desc: "Prolonging the sound",
+            name: "Madd (Lengthening)", arabicName: "المد", rule: "Natural or Secondary Cause", duration: "2 to 6 Beats", desc: "Madd literally means prolongation or expansion. In Tajweed, it refers to prolonging the voice with a vowel sound when meeting specific letters.", exEn: "Nūḥīhā (We reveal it to you)", exAr: "نُوحِيهَا",
             children: [
                 {
-                    name: "Natural Madd (Asli)",
-                    desc: "2 Beats",
+                    name: "Natural Madd (Asli)", arabicName: "المد الطبيعي", rule: "No Hamzah or Sukoon follows", duration: "2 Beats", desc: "The basic elongation of a vowel sound. It occurs when a Madd letter is not followed by a Hamzah or a Sukoon.", exEn: "Qāla (He said)", exAr: "قَالَ",
                     children: [
-                        { name: "Basic Natural", desc: "Ex: Qaa-la" },
-                        { name: "Madd 'Iwad", desc: "Substitute | Ex: 'Aleema -> 'Aleemaa" },
-                        { name: "Madd Silah Sughra", desc: "Connecting | Ex: Bihi -> Bihee" },
-                        { name: "Madd Tamkeen", desc: "Strengthening | Ex: Nabiyyeen" }
+                        { name: "Basic Natural", arabicName: "الطبيعي الكلمي", rule: "Standard condition", duration: "2 Beats", desc: "Found in regular words where the Madd letter is pronounced normally.", exEn: "Yaqūlu (He says)", exAr: "يَقُولُ" },
+                        { name: "Madd 'Iwad", arabicName: "مد العوض", rule: "Stopping on double Fathah", duration: "2 Beats", desc: "Occurs when stopping on a word ending with a double Fathah (Tanween Fath). The Tanween is replaced with an Alif.", exEn: "Hakeemā (Wise)", exAr: "حَكِيمًا" },
+                        { name: "Silah Sughra", arabicName: "الصلة الصغرى", rule: "Pronoun Haa (هـ) between vowels", duration: "2 Beats", desc: "Connecting the pronoun 'Haa' (representing 'him/his') with a Waw or Yaa sound when it is between two voweled letters.", exEn: "Innahu Kāna (Indeed He was)", exAr: "إِنَّهُ كَانَ" },
+                        { name: "Madd Tamkeen", arabicName: "مد التمكين", rule: "Two Yaa's meeting", duration: "2 Beats", desc: "Occurs when two 'Yaa' letters meet, the first has a Shaddah and Kasrah, and the second is a Madd letter.", exEn: "Huyyeetum (You are greeted)", exAr: "حُيِّيتُمْ" }
                     ]
                 },
                 {
-                    name: "Secondary Madd (Far'i)",
-                    desc: "Requires a cause (>2 beats)",
+                    name: "Secondary Madd (Far'i)", arabicName: "المد الفرعي", rule: "Requires a cause (Hamzah/Sukoon)", duration: "4 to 6 Beats", desc: "An elongation that exceeds the natural 2 beats due to a specific reason: a Hamzah or a Sukoon appearing after the Madd letter.", exEn: "As-Samā' (The sky)", exAr: "السَّمَاء",
                     children: [
                         {
-                            name: "Cause: Hamzah",
-                            desc: "Due to Hamzah",
+                            name: "Cause: Hamzah", arabicName: "بسبب الهمز", rule: "Hamzah follows Madd letter", duration: "4 to 5 Beats", desc: "The lengthening caused when a Hamzah appears immediately after a Madd letter.", exEn: "Mā unzila (What was revealed)", exAr: "مَا أُنْزِلَ",
                             children: [
-                                { name: "Muttasil", desc: "Attached (4-5 beats) | Ex: Jaa'a" },
-                                { name: "Munfasil", desc: "Detached (4-5 beats) | Ex: Bimaa Anzala" },
-                                { name: "Silah Kubra", desc: "Greater Connecting (4-5 beats)" },
-                                { name: "Badal", desc: "Substitute (2 beats) | Ex: Aamanu" }
+                                { name: "Muttasil (Attached)", arabicName: "الواجب المتصل", rule: "Hamzah in the SAME word", duration: "4 or 5 Beats", desc: "Occurs when the Madd letter and the Hamzah are in the same word. It is obligatory to stretch.", exEn: "Jā'a (He came)", exAr: "جَاءَ" },
+                                { name: "Munfasil (Detached)", arabicName: "الجائز المنفصل", rule: "Hamzah in the NEXT word", duration: "4 or 5 Beats", desc: "Occurs when the Madd letter is at the end of a word and the Hamzah is at the beginning of the next word.", exEn: "Fī Amrinā (In our matter)", exAr: "فِي أَمْرِنَا" },
+                                { name: "Silah Kubra", arabicName: "الصلة الكبرى", rule: "Pronoun Haa followed by Hamzah", duration: "4 or 5 Beats", desc: "Like Silah Sughra, but the word immediately following the pronoun 'Haa' starts with a Hamzah.", exEn: "Mālahū Akhladah (His wealth will make him immortal)", exAr: "مَالَهُ أَخْلَدَهُ" },
+                                { name: "Badal (Substitute)", arabicName: "مد البدل", rule: "Hamzah precedes Madd letter", duration: "2 Beats", desc: "Occurs when a Hamzah comes BEFORE a Madd letter. It is treated like Natural Madd (2 beats for Hafs).", exEn: "Āmanū (They believed)", exAr: "آمَنُوا" }
                             ]
                         },
                         {
-                            name: "Cause: Sukoon",
-                            desc: "Due to Sukoon/Shaddah",
+                            name: "Cause: Sukoon", arabicName: "بسبب السكون", rule: "Sukoon follows Madd letter", duration: "2, 4, or 6 Beats", desc: "The lengthening caused when a temporary or permanent Sukoon (stillness) follows a Madd letter.", exEn: "Al-'Ālamīn", exAr: "الْعَالَمِينَ",
                             children: [
-                                { name: "'Aarid", desc: "Temporary (2/4/6 beats) | Ex: Al-'Alameen" },
-                                { name: "Leen", "desc": "Softness (2/4/6 beats) | Ex: Khawf" },
+                                { name: "'Aarid (Temporary)", arabicName: "العارض للسكون", rule: "Stopping on the last letter", duration: "2, 4, or 6 Beats", desc: "Occurs only when stopping on a word. The last letter gets a temporary Sukoon, and the preceding Madd letter is stretched.", exEn: "Ar-Raheem (The Merciful)", exAr: "الرَّحِيمِ" },
+                                { name: "Lin (Soft)", arabicName: "مد اللين", rule: "Waw/Yaa with Sukoon preceded by Fathah", duration: "2, 4, or 6 Beats", desc: "Occurs when stopping on a word where the second to last letter is a Waw or Yaa with a Sukoon, and the letter before it has a Fathah.", exEn: "Khawf (Fear)", exAr: "خَوْف" },
                                 {
-                                    name: "Laazim",
-                                    desc: "Compulsory (6 beats)",
+                                    name: "Laazim (Compulsory)", arabicName: "المد اللازم", rule: "Permanent Sukoon/Shaddah follows", duration: "6 Beats", desc: "Occurs when an original (permanent) Sukoon or a Shaddah follows a Madd letter in the same word or letter. Always 6 beats.", exEn: "Ad-Dālleen", exAr: "الضَّالِّينَ",
                                     children: [
-                                        { name: "Kalimi Muthaqqal", desc: "Word Heavy | Ex: Daabbah" },
-                                        { name: "Kalimi Mukhaffaf", desc: "Word Light | Ex: Aaal-aana" },
-                                        { name: "Harfi Muthaqqal", desc: "Letter Heavy | Ex: Alif-Laam-Meem" },
-                                        { name: "Harfi Mukhaffaf", desc: "Letter Light | Ex: Qaaf" }
+                                        { name: "Kalimi Muthaqqal", arabicName: "كلمي مثقل", rule: "Shaddah in a word", duration: "6 Beats", desc: "Heavy Word Compulsory Madd: A Madd letter followed by a Shaddah in a word.", exEn: "Al-Hāqqah", exAr: "الْحَاقَّةُ" },
+                                        { name: "Kalimi Mukhaffaf", arabicName: "كلمي مخفف", rule: "Original Sukoon in a word", duration: "6 Beats", desc: "Light Word Compulsory Madd: A Madd letter followed by an unmerged Sukoon (occurs in only one word in Quran).", exEn: "Āl'āna (Now)", exAr: "آلْآنَ" },
+                                        { name: "Harfi Muthaqqal", arabicName: "حرفي مثقل", rule: "Merged letter in intro", duration: "6 Beats", desc: "Heavy Letter Compulsory Madd: Found in the opening letters of Surahs when a letter's pronunciation ends in a consonant that merges (Idgham) into the next.", exEn: "Alif Lām Meem", exAr: "الٓمٓ" },
+                                        { name: "Harfi Mukhaffaf", arabicName: "حرفي مخفف", rule: "Unmerged letter in intro", duration: "6 Beats", desc: "Light Letter Compulsory Madd: Found in opening letters when the spelling of the letter has a Madd followed by a Sukoon that is not merged.", exEn: "Nūn", exAr: "نٓ" }
                                     ]
                                 }
                             ]
@@ -221,46 +286,32 @@
             ]
         };
 
-        const container = document.getElementById('tree-container');
-        let width = container.clientWidth;
-        let height = container.clientHeight;
-        
-        const margin = { top: 40, right: 250, bottom: 40, left: 150 };
-        const dy = 280; // Distance between layers (increased to fit examples)
-        const dx = 50;  // Distance between sibling nodes
-        
-        const svg = d3.select("#tree-container").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .style("font", "10px sans-serif")
-            .style("user-select", "none");
+        // --- Setup D3 Canvas ---
+        const container = document.getElementById("map-container");
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const margin = { top: 20, right: 90, bottom: 30, left: 90 };
 
-        // SVG Groups for Links and Nodes
-        const gLink = svg.append("g").attr("fill", "none").attr("stroke", "#cbd5e1");
-        const gNode = svg.append("g").attr("cursor", "pointer").attr("pointer-events", "all");
+        const svg = d3.select("#map-container").append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
         const zoom = d3.zoom()
-            .scaleExtent([0.2, 2.5])
-            .on("zoom", (event) => {
-                gLink.attr("transform", event.transform);
-                gNode.attr("transform", event.transform);
-            });
-            
+            .scaleExtent([0.5, 2])
+            .on("zoom", (event) => g.attr("transform", event.transform));
+
         svg.call(zoom);
 
-        // Initial View Transform
-        let initialTransform = d3.zoomIdentity.translate(margin.left, height / 2).scale(0.95);
-        svg.call(zoom.transform, initialTransform);
+        const g = svg.append("g");
+        const treeMap = d3.tree().nodeSize([45, 220]); // Adjust spacing
 
-        let root = d3.hierarchy(treeData);
-        let tree = d3.tree().nodeSize([dx, dy]);
-        let nodeId = 0; // Global Node ID counter
-
-        // Root starting position
+        let root = d3.hierarchy(treeData, d => d.children);
         root.x0 = height / 2;
         root.y0 = 0;
 
-        // Flawless recursive collapse function
+        // Collapse all children initially except the first level
+        root.children.forEach(collapse);
+
         function collapse(d) {
             if (d.children) {
                 d._children = d.children;
@@ -269,159 +320,139 @@
             }
         }
 
-        // Setup Initial Tree State (Open level 1, collapse level 2 and beyond)
-        function setInitialTreeState() {
-            if (root.children) {
-                root.children.forEach(child => {
-                    if (child.children) {
-                        child.children.forEach(collapse);
-                    }
-                });
-            }
-        }
+        let i = 0;
+        update(root);
 
-        // Apply initial state
-        setInitialTreeState();
+        // Center map initially
+        resetMap();
 
         function update(source) {
-            const duration = 400; // Animation duration
-            
-            // Recalculate tree layout
-            tree(root);
-            const nodes = root.descendants().reverse();
-            const links = root.links();
+            const treeData = treeMap(root);
+            const nodes = treeData.descendants();
+            const links = treeData.descendants().slice(1);
 
-            // --------- NODES ---------
-            const node = gNode.selectAll("g.node")
-                .data(nodes, d => d.id || (d.id = ++nodeId));
+            nodes.forEach(d => d.y = d.depth * 250);
 
-            const nodeEnter = node.enter().append("g")
-                .attr("class", "node")
+            // Nodes
+            const node = g.selectAll('g.node')
+                .data(nodes, d => d.id || (d.id = ++i));
+
+            const nodeEnter = node.enter().append('g')
+                .attr('class', 'node')
                 .attr("transform", d => `translate(${source.y0},${source.x0})`)
-                .attr("fill-opacity", 0)
-                .attr("stroke-opacity", 0)
-                .on("click", (event, d) => {
-                    // Robust click toggle logic
-                    if (d.children) {
-                        d._children = d.children;
-                        d.children = null;
-                    } else if (d._children) {
-                        d.children = d._children;
-                        d._children = null;
-                    }
-                    update(d);
-                });
+                .on('click', click);
 
-            // Add Node Circles
-            nodeEnter.append("circle")
-                .attr("r", 7)
-                .attr("fill", d => d._children ? "#ccfbf1" : "#fff") // Tinted if collapsed
-                .attr("stroke-width", d => d._children ? 3 : 2.5);
+            nodeEnter.append('circle')
+                .attr('r', 1e-6)
+                .style("fill", d => d._children ? "#ccfbf1" : "#fff");
 
-            // Add Text Elements using tspan for precise multi-line formatting
-            const textGroups = nodeEnter.append("g")
-                .attr("class", "text-group")
-                .attr("transform", d => `translate(${d.children || d._children ? -12 : 12}, 0)`);
-
-            // Append background outline for readability over links
-            const textBg = textGroups.append("text")
-                .attr("class", "text-outline")
+            nodeEnter.append('text')
                 .attr("dy", "-0.2em")
-                .attr("text-anchor", d => d.children || d._children ? "end" : "start");
-                
-            textBg.append("tspan").text(d => d.data.name).attr("class", "title-text");
-            textBg.append("tspan")
-                .text(d => d.data.desc || "")
-                .attr("x", 0) // Relative to text-group
+                .attr("x", d => d.children || d._children ? -15 : 15)
+                .attr("text-anchor", d => d.children || d._children ? "end" : "start")
+                .text(d => d.data.name)
+                .style("font-weight", "bold");
+
+            nodeEnter.append('text')
+                .attr("class", "details")
                 .attr("dy", "1.2em")
-                .attr("class", "subtitle-text");
+                .attr("x", d => d.children || d._children ? -15 : 15)
+                .attr("text-anchor", d => d.children || d._children ? "end" : "start")
+                .text(d => d.data.duration);
 
-            // Append foreground actual text
-            const textFg = textGroups.append("text")
-                .attr("dy", "-0.2em")
-                .attr("text-anchor", d => d.children || d._children ? "end" : "start");
-                
-            textFg.append("tspan").text(d => d.data.name).attr("class", "title-text");
-            textFg.append("tspan")
-                .text(d => d.data.desc || "")
-                .attr("x", 0) // Relative to text-group
-                .attr("dy", "1.2em")
-                .attr("class", "subtitle-text");
+            const nodeUpdate = nodeEnter.merge(node);
+            nodeUpdate.transition()
+                .duration(400)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
 
-            const nodeUpdate = node.merge(nodeEnter).transition().duration(duration)
-                .attr("transform", d => `translate(${d.y},${d.x})`)
-                .attr("fill-opacity", 1)
-                .attr("stroke-opacity", 1);
+            nodeUpdate.select('circle')
+                .attr('r', 8)
+                .style("fill", d => d._children ? "#ccfbf1" : "#fff")
+                .attr('cursor', 'pointer');
 
-            // Update circle visual state on interaction
-            nodeUpdate.select("circle")
-                .attr("fill", d => d._children ? "#0d9488" : "#fff") 
-                .attr("stroke", "#0d9488");
-
-            const nodeExit = node.exit().transition().duration(duration).remove()
+            const nodeExit = node.exit().transition()
+                .duration(400)
                 .attr("transform", d => `translate(${source.y},${source.x})`)
-                .attr("fill-opacity", 0)
-                .attr("stroke-opacity", 0);
+                .remove();
 
-            // --------- LINKS ---------
-            const link = gLink.selectAll("path.link")
-                .data(links, d => d.target.id);
+            nodeExit.select('circle').attr('r', 1e-6);
+            nodeExit.select('text').style('fill-opacity', 1e-6);
 
-            // Diagonal curve generator
-            const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+            // Links
+            const link = g.selectAll('path.link')
+                .data(links, d => d.id);
 
-            // Enter new links
-            const linkEnter = link.enter().append("path")
+            const linkEnter = link.enter().insert('path', "g")
                 .attr("class", "link")
-                .attr("d", d => {
-                    const o = {x: source.x0, y: source.y0};
-                    return diagonal({source: o, target: o});
+                .attr('d', d => {
+                    const o = { x: source.x0, y: source.y0 };
+                    return diagonal(o, o);
                 });
 
-            // Update existing links
-            link.merge(linkEnter).transition().duration(duration)
-                .attr("d", diagonal);
+            const linkUpdate = linkEnter.merge(link);
+            linkUpdate.transition()
+                .duration(400)
+                .attr('d', d => diagonal(d, d.parent));
 
-            // Exit old links
-            link.exit().transition().duration(duration).remove()
-                .attr("d", d => {
-                    const o = {x: source.x, y: source.y};
-                    return diagonal({source: o, target: o});
-                });
+            const linkExit = link.exit().transition()
+                .duration(400)
+                .attr('d', d => {
+                    const o = { x: source.x, y: source.y };
+                    return diagonal(o, o);
+                })
+                .remove();
 
-            // Save positions for the next animation
-            root.eachBefore(d => {
+            nodes.forEach(d => {
                 d.x0 = d.x;
                 d.y0 = d.y;
             });
         }
 
-        
-        // Reset Function
-        window.resetMap = function() {
-            // Restore proper data hierarchy root state
-            if (root._children) {
-                root.children = root._children;
-                root._children = null;
-            }
-            setInitialTreeState();
-            update(root);
-
-            // Recalculate layout center based on window size
-            initialTransform = d3.zoomIdentity.translate(margin.left, container.clientHeight / 2).scale(0.95);
-            
-            // Smoothly animate back to original zoom/pan
-            svg.transition().duration(750).call(zoom.transform, initialTransform);
+        function diagonal(s, d) {
+            return `M ${s.y} ${s.x} C ${(s.y + d.y) / 2} ${s.x}, ${(s.y + d.y) / 2} ${d.x}, ${d.y} ${d.x}`;
         }
 
-        // Initial render
-        update(root);
-        
-        // Handle window resize dynamically without breaking
+        // Action when a node is clicked
+        function click(event, d) {
+            // 1. Update UI Panel with selected node data
+            updateDetailsPanel(d.data);
+
+            // 2. Expand or collapse node
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update(d);
+        }
+
+        // Function to update the right side panel
+        function updateDetailsPanel(data) {
+            document.getElementById("dt-name").textContent = data.name || "N/A";
+            document.getElementById("dt-ar").textContent = data.arabicName || "";
+            document.getElementById("dt-badge").textContent = data.duration || "N/A";
+            document.getElementById("dt-rule").textContent = data.rule || "N/A";
+            document.getElementById("dt-duration").textContent = data.duration || "N/A";
+            document.getElementById("dt-desc").textContent = data.desc || "No description available.";
+            document.getElementById("dt-ex-en").textContent = data.exEn || "N/A";
+            document.getElementById("dt-ex-ar").textContent = data.exAr || "";
+        }
+
+        function resetMap() {
+            // Center the root node
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(width / 4, height / 2).scale(1)
+            );
+        }
+
+        // Handle window resize
         window.addEventListener('resize', () => {
-            width = container.clientWidth;
-            height = container.clientHeight;
-            svg.attr("width", width).attr("height", height);
+            const newWidth = container.clientWidth;
+            const newHeight = container.clientHeight;
+            svg.attr("width", newWidth).attr("height", newHeight);
         });
 
     </script>
